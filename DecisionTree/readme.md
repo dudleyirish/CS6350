@@ -45,6 +45,12 @@ performs the tests for part a.
 p2b.m - A function that takes the input file names as arguments and
 performs the tests for part b.  Generates the error rate table into
 p2b_error.tex which is included in the homework solution.
+To run the tests start Octave then eval the function:
+
+octave> p2b("path to training data", "path to test data");
+
+This will run all of the training and testing and generate the error
+rate table into p2b_error.tex.
 
 p3a.m - A function that takes the input file names as arguments and
 performs the tests for part a.
