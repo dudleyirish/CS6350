@@ -7,7 +7,7 @@
 %%
 %% Returns:
 %% fh a function handle to a classification function.
-function fh = CreateClassifier (name,  C, N, L, V, A)
+function fh = CreateClassifier (name, C, N, L, V, A)
   filename = strcat(name, ".m");
   fid = fopen(filename, "w");
   if (fid == -1)
@@ -52,9 +52,15 @@ function fh = CreateClassifier1 (fid, expr, node, C, N, L, V, A)
       end
       needs_and = 1;
       attr = find(strcmp(A, N{node}));
-      CreateClassifier1(fid, ...
-			cstrcat(expr, sprintf("strcmp(a(%d), '%s')", attr, V{child})),
-			child, C, N, L, V, A);
+      if isa(V{child}, "numeric")
+	CreateClassifier1(fid, ...
+			  cstrcat(expr, sprintf("a{%d} == %d", attr, V{child})),
+			  child, C, N, L, V, A);
+      else
+	CreateClassifier1(fid, ...
+			  cstrcat(expr, sprintf("strcmp(a(%d), \"%s\")", attr, V{child})),
+			  child, C, N, L, V, A);
+      end
     end
   end
 end

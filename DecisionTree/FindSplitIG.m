@@ -8,7 +8,7 @@
 %%
 function attr = FindSplitIG (S, attr_names, attr_values)
   EntropyS = H(S(:,end));
-  %%printf("\n    Entering FindSplit: EntropyS = %d\n", EntropyS);
+  %%printf("\n    Entering FindSplit: EntropyS = %d, %d\n", EntropyS, columns(S));
   gains = [];
   
   for attr = 1:columns(S)-1
@@ -16,7 +16,12 @@ function attr = FindSplitIG (S, attr_names, attr_values)
     values = attr_values{attr};
     sum = 0;
     for idx = 1:columns(values)
-      Sv = S(find(strcmp(S(:, attr), values(idx))), end);
+      if (strcmp(values(idx), 'numeric'))
+	Sv = S(find(cell2mat(S(:, attr))), end);
+      else
+	Sv =    S(find(strcmp(S(:, attr), values(idx))), end);
+      end
+
       if isempty(Sv)
 	%%printf("        %s = %s: 0 of %d examples\n", ...
 	%%       attr_names{attr}, values{idx}, rows(S));

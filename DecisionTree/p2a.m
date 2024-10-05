@@ -19,7 +19,7 @@ function [e, y] = p2a (trainfile, testfile)
   S = ReadCarData(trainfile);
   F = ones(rows(S), 1);
   printf("Learn the decision tree using fractional counts:\n\n");
-  ID3(S, F, 5, attr_names, attr_values, 5, @FindSplitIG);
+  ID3(S, F, 5, attr_names, attr_values, columns(S), @FindSplitIG);
   printf("\nA textual representation of the tree:\n");
   WriteTree(Connectivity, NodeName, NodeLabel, NodeValue);
   printf("\n\nThe tree as a conjunction of prediction rules:\n");

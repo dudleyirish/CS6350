@@ -22,8 +22,7 @@ function node = ID3_r (S, F, level, attr_names, attr_values, label, value, split
     error("Parameter splitter must be a function handle");
   end
 
-  %%printf("Entering ID3: level = %d\n", level);
-  %%WriteS(S, attr_names)
+  %% printf("Entering ID3: level = %d\n", level);
 
   %% Allocate a root/leaf node
   node = AllocNode();
@@ -31,7 +30,7 @@ function node = ID3_r (S, F, level, attr_names, attr_values, label, value, split
     %%printf("Level limit reached, return leaf node.\n");
     NodeName{node} = 'leaf';
     %% attributes is empty, label is most common value (mode).
-    NodeLabel(node) = cellmode(S);
+    NodeLabel(node) = cellmode(S(:,end));
     NodeValue(node) = value;    
   %% If all examples have the same label
   elseif all(strcmp(S(:, label), S(1, label)))
@@ -42,28 +41,49 @@ function node = ID3_r (S, F, level, attr_names, attr_values, label, value, split
     if (columns(S) > 1)
       NodeLabel(node) = S{1, label};
     else %% attributes is empty, label is most common value (mode).
-      NodeLabel(node) = cellmode(S);
+      NodeLabel(node) = cellmode(S(:,end));
     end 
+    NodeValue(node) = value;
+  elseif columns(S) == 1
+    %% Out of columns, create a leaf node with most common value
+    %%printf("Out of columns, return leaf node.\n");
+    NodeName{node} = 'leaf';
+    NodeLabel(node) = cellmode(S(:,end));
     NodeValue(node) = value;
   else
     %% Create root node,
     %%printf("Create a root node: %d\n", node);
     split_attr = splitter(S, attr_names, attr_values);
+    %%printf("    split_attr = %d\n", split_attr);
     split_name = strtrim(attr_names{split_attr});
     NodeName{node} = split_name;
     NodeValue(node) = value;
     %%printf("Split attr is %s\n", split_name);
     values = attr_values{split_attr};
+    if find(strcmp(values, "'aug'"))
+      printf("Now what?  values = ", disp(values));
+    end
+    numeric_attr = false;
+    if (strcmp(values(1), 'numeric'))
+      values = [0,1];
+      numeric_attr = true;
+    end
     for idx = 1:columns(values)
-      matches = find(strcmp(S(:, split_attr), values(idx)));
+      if numeric_attr
+	matches = find(cell2mat(S(:, split_attr)) == values(idx));
+	value_str = sprintf("%d", values(idx));
+      else
+	matches = find(strcmp(S(:, split_attr), values(idx)));
+	value_str = strcat("'", values{idx}, "'");
+      end
       %% if Sv is empty
       if numel(matches) == 0
 	%%printf("Sv is empty, return leafnode, v = %s\n", ...
 	%%       cellmode(S(:,end)){1});
-	leafnode = AllocNode('Leaf', cellmode(S(:,end)), values{idx});
+	leafnode = AllocNode('Leaf', cellmode(S(:,end)), values(idx));
 	Connectivity(node, leafnode) = 1;
       else
-	%%printf("Recur on Sv, attribute value = %s\n", values{idx});
+	%%printf("Recur on Sv, attribute value = %s\n", value_str);
 	Sv = S(matches, [1:split_attr-1,split_attr+1:end]);
 	%% N.B. the use of parens on the cell array attr_values, ain't matlab wonderful
 	newnode = ID3_r(Sv, ...
@@ -78,7 +98,7 @@ function node = ID3_r (S, F, level, attr_names, attr_values, label, value, split
       end
     end
   end
-  %%printf("\n");
+  %%printf("Leaving ID3\n");
 end
 
 function node = AllocNode(name = 'UNKNOWN', label = '_', value='_')
