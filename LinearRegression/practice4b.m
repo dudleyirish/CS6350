@@ -20,7 +20,7 @@ function J = practice4b (trainfile, testfile)
   
   x = [Train, ones(53,1)]';
   w = zeros(8,1);
-  [J, w, G] = StochasticGradientDescent(w, x, train_y, 0.0001);
+  [J, w, G] = StochasticGradientDescent(w, x, train_y, 0.0001, 1000);
 
   %% Compute cost function on test data
   x = [Test, ones(rows(Test),1)]';
