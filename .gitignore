@@ -2,3 +2,5 @@
 *#
 *.eps
 octave-workspace
+test.m
+debug_load.m
